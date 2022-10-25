@@ -28,7 +28,7 @@ jobs:
       with: 
         target: Submit
         paclet_cicd_version: 0.33.3
-        definition_notebook: ./ResourceDefinition.nb
+        definition_notebook: ./WeakCache/ResourceDefinition.nb
         resource_system_base: https://www.wolframcloud.com/obj/resourcesystem/api/1.0
     - name: UploadWorkflowValues
       id: upload-workflow-values-step
