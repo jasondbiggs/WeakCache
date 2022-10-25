@@ -20,7 +20,7 @@ weakHashTableQ[___] := False
 getTable[HoldPattern[WeakHashTable[tab_]]] := tab
 
 WeakHashTable[label_String] := Replace[
-	Language`NewExpressionStore[label],
+	Language`NewExpressionStore[Echo @ label],
 	{
 		store_Language`ExpressionStore :> System`Private`ConstructNoEntry[WeakHashTable, store],
 		_ -> $Failed
