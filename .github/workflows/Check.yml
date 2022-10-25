@@ -2,9 +2,9 @@ name: Check
 on: 
   workflow_dispatch:
   push: 
-    branches:  [main]
+    branches:  [master]
   pull_request: 
-    branches:  [main]
+    branches:  [master]
 env: 
   RESOURCE_PUBLISHER_TOKEN: ${{ secrets.RESOURCE_PUBLISHER_TOKEN }}
   WOLFRAMSCRIPT_ENTITLEMENTID: ${{ secrets.WOLFRAMSCRIPT_ENTITLEMENTID }}
