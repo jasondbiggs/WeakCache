@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Wolfram Language Package *)
 
 BeginPackage["CachUtilities`Build`"]
@@ -8,9 +10,9 @@ buildPaclet
 Begin["`Private`"] (* Begin Private Context *) 
 
 $libraryName = "CleanupAfter"
-$pacletName = "WeakHashTable"
+$pacletName = "WeakCache"
 $inputFileName = $InputFileName
-$pacletSourceDir = FileNameJoin @ {ParentDirectory @ DirectoryName[$inputFileName], $pacletName}
+$pacletSourceDir = ParentDirectory @ DirectoryName[$inputFileName]
 $extension = Replace[$OperatingSystem, 
 	{
 		"MacOSX" -> ".dylib",
