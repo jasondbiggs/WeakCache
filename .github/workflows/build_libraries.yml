@@ -1,4 +1,4 @@
-name: CompileTestAndPublish
+name: BuildLibraries
 on: 
   workflow_dispatch:
   pull_request: 
