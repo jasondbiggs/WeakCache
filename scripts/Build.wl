@@ -13,75 +13,26 @@ $libraryName = "CleanupAfter"
 $pacletName = "WeakCache"
 $inputFileName = $InputFileName
 $pacletSourceDir = ParentDirectory @ DirectoryName[$inputFileName]
-$extension = Replace[$OperatingSystem, 
-	{
-		"MacOSX" -> ".dylib",
-		"Windows" ->".dll",
-		_ -> ".so"
-	}
-];
+
+$sourceFile = FileNameJoin[{$pacletSourceDir, "CPPSource", $libraryName <> ".cpp"}]
+$targetDirectory = FileNameJoin[{$pacletSourceDir, "LibraryResources", $SystemID}]
 
 
-Options[buildPaclet] = {
-	"TargetDirectory" -> Automatic,
-	"BuildLibrary" -> Automatic,
-	"Clean" -> False
-}
+Needs["Wolfram`PacletCICD`" -> "cicd`"]
+Needs["CCompilerDriver`"]
 
-buildPaclet[OptionsPattern[]] := Module[
-	{targetdir, buildLib},
-	{targetdir, buildLib} = OptionValue @ {"TargetDirectory", "BuildLibrary"};
-	targetdir = Replace[
-		OptionValue["TargetDirectory"],
-		Automatic :> FileNameJoin[{ParentDirectory @ $pacletSourceDir, "build", $pacletName}]
-	];
-	buildLib = Replace[OptionValue["BuildLibrary"],
-		Automatic :> !FileExistsQ[
-			FileNameJoin[{$pacletSourceDir, "LibraryResources", $SystemID, $libraryName <> $extension}]
-		]
-	];
-	If[buildLib,
-		Replace[
-			buildLibrary[],
-			x : Except[_?FileExistsQ] :> Return[x, Module]
-		]
-	];
-	If[DirectoryQ[targetdir],
-		DeleteDirectory[targetdir, DeleteContents -> True];
-	];
-	CreateDirectory[targetdir];
-	CopyDirectory[
-		FileNameJoin[{$pacletSourceDir, "Kernel"}],
-		FileNameJoin[{targetdir, "Kernel"}]
-	];
-	CopyDirectory[
-		FileNameJoin[{$pacletSourceDir, "LibraryResources"}],
-		FileNameJoin[{targetdir, "LibraryResources"}]
-	];
-	CopyFile[
-		FileNameJoin[{$pacletSourceDir, "PacletInfo.wl"}],
-		FileNameJoin[{targetdir, "PacletInfo.wl"}]
-	]
+
+Print["building library"];
+$built = CCompilerDriver`CreateLibrary[
+	{$sourceFile}, 
+	$libraryName, 
+	"TargetDirectory" -> $targetDirectory, "Language" -> "C++"
 ]
 
-
-
-
-buildLibrary[] := (
-	Needs["CCompilerDriver`"];
-	Module[
-		{
-			sourceFile = FileNameJoin[{$pacletSourceDir, "CPPSource", $libraryName <> ".cpp"}],
-			targetDirectory = FileNameJoin[{$pacletSourceDir, "LibraryResources", $SystemID}]
-		},
-		PrintTemporary["building library"];
-		CCompilerDriver`CreateLibrary[
-			{sourceFile}, 
-			$libraryName, 
-			"TargetDirectory" -> targetDirectory, "Language" -> "C++"
-		]
-	]
-)
+If[FileExistsQ @ $built,
+	$built,
+	cicd`ConsoleError[ "Failed to build the library on " <> $SystemID <> ".", "Fatal" -> True ]
+]
 
 
 
