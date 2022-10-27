@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Wolfram Language package *)
 
 BeginPackage["JasonB`WeakCache`CacheFunctions`", {"JasonB`WeakCache`"}]
@@ -20,7 +22,7 @@ weakHashTableQ[___] := False
 getTable[HoldPattern[WeakHashTable[tab_]]] := tab
 
 WeakHashTable[label_String] := Replace[
-	Language`NewExpressionStore[Echo @ label],
+	Language`NewExpressionStore[label],
 	{
 		store_Language`ExpressionStore :> System`Private`ConstructNoEntry[WeakHashTable, store],
 		_ -> $Failed
@@ -94,6 +96,9 @@ Protect[$strongReference]
 
 (*
 
+		This is the usage for the "HashTable" data structure, 
+		trying to model the weak hash table on that:
+
       	ds["Elements"]	return a list of the elements of ds	time: O(n)
       	ds["EmptyQ"]	True, if ds has no elements	time: O(1)
       	ds["Insert",key->value]	add key to ds with the associated value and return True if the addition succeeded	time: O(1)
@@ -106,8 +111,6 @@ Protect[$strongReference]
       	ds["Lookup",key,defFun]	return the value stored with key in ds; if the key is not found return defFun[key]	time: O(1)
       	ds["Values"]	return the values in ds as a list	time: O(n)
       	ds["Visualization"]	return a visualization of ds	time: O(n)
-
-
 
 *)
 
@@ -134,7 +137,11 @@ WeakHashTable[tab_Language`ExpressionStore][
 
 WeakHashTable[tab_Language`ExpressionStore][
 	"Lookup", expr_, key_
-]  := tab[get[expr,key]]
+] := Replace[tab[get[expr,key]], Null :> $Failed]
+
+WeakHashTable[tab_Language`ExpressionStore][
+	"Lookup", expr_
+] := Replace[tab[get[expr,Automatic]], Null :> $Failed]
 
 WeakHashTable[tab_Language`ExpressionStore][
 	"KeyDrop", expr_, key_
@@ -173,6 +180,11 @@ WeakHashTable[tab_Language`ExpressionStore][
 
 ** ************************************************************************* *)
 
+SetWeakCache[HoldPattern[Rule[a_, Rule[b_, c_]]]] := $store @ put[a, b, c]
+SetWeakCache[HoldPattern[Rule[Rule[a_, b_], c_]]] := $store @ put[a, b, c]
+
+SetWeakCache[expr_, key_, value_] := $store @ put[expr, key, value]
+SetWeakCache[expr_, value_] := $store @ put[expr, Automatic, value]
 
 (* *************************************************************************
 
@@ -181,35 +193,23 @@ WeakHashTable[tab_Language`ExpressionStore][
 ** ************************************************************************* *)
 
 
+CheckWeakCache[expr_, key_] := Replace[$store @ get[expr, key], Null :> $Failed]
+CheckWeakCache[expr_] := Replace[$store @ get[expr, Automatic], Null :> $Failed]
+
+
+
 (* *************************************************************************
 
             ClearWeakCache
 
 ** ************************************************************************* *)
 
-
-
-
-
-CacheSet[HoldPattern[Rule[a_, Rule[b_, c_]]]] := $store @ put[a, b, c]
-CacheSet[HoldPattern[Rule[Rule[a_, b_], c_]]] := $store @ put[a, b, c]
-CacheSet[a_, b_, c_] := $store @ put[a, b, c]
-
-CacheSet[Rule[a_, c_]] := $store @ put[a, $singleton, c]
-CacheSet[a_, c_] := $store @ put[a, $singleton, c]
-
-
-WeakCacheValue[expr_] := $store @ get[expr, $singleton]
-WeakCacheValue[expr_, key_] := $store @ get[expr, key]
-
-WeakCacheValue /: HoldPattern[Set[WeakCacheValue[expr_], val_]] := ($store @ put[expr, $singleton, val]; val)
-WeakCacheValue /: HoldPattern[Set[WeakCacheValue[expr_, key_], val_]] := ($store @ put[expr, key, val]; val)
-
-WeakCacheValue /: HoldPattern[Unset[WeakCacheValue[expr_]]] := ($store @ remove[expr];)
-WeakCacheValue /: HoldPattern[Unset[WeakCacheValue[expr_, key_]]] := ($store @ remove[expr, key];)
-
-WeakCacheValue /: HoldPattern[Remove[WeakCacheValue[expr_]]] := ($store @ remove[expr];)
-WeakCacheValue /: HoldPattern[Remove[WeakCacheValue[expr_, key_]]] := ($store @ remove[expr, key];)
+ClearWeakCache[expr_, key_] := UnsameQ[$store @ remove[expr, key], Null]
+ClearWeakCache[expr_] := UnsameQ[$store @ remove[expr], Null]
+ClearWeakCache[] := (Replace[$store @ listTable[],
+	{expr : Except[_StrongReference], _} :> $store[remove[expr]],	
+	{1}	
+]; True)
 
 
 
@@ -300,8 +300,7 @@ CreateReference[expr_, "Weak"] := With[
 
 
 
-
-EndPackage[]
-
 End[]
 
+
+EndPackage[]

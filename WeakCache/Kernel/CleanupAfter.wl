@@ -55,10 +55,10 @@ CleanupAfter[] /; $Initialized := (Map[
 ];)
 
 
-iCleanup[id_] := (
+iCleanup[id_] := WithCleanup[Null,Null,
 	$cache[id];
 	KeyDropFrom[$cache, id];
-)
+]
 
 
 End[]
