@@ -5,8 +5,8 @@ BeginPackage["JasonB`WeakCache`"]
 	PacletObject["JasonB/WeakCache"]["Extensions"],
 	{"Kernel", ___, _["Symbols", `Private`symbols_], ___} :> `Private`symbols
 ]
-Unprotect /@ Chemistry`Private`$exportedSymbols
-ClearAll /@ Chemistry`Private`$exportedSymbols
+Unprotect /@ `Private`$exportedSymbols
+ClearAll /@ `Private`$exportedSymbols
 
 
 CleanupAfter::usage = "CleanupAfter[expr, func] evaluates func when there are no more references to expr in a Wolfram Language session."
