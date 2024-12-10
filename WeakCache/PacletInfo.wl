@@ -10,7 +10,6 @@ PacletObject @ <|
 	"WolframVersion" -> "13.0+",
 	"Extensions" ->
 		{
-			{"LibraryLink"},
 			{
 				"Kernel",
 				"Root" -> "Kernel",
