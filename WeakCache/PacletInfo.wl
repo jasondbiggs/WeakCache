@@ -6,8 +6,8 @@ PacletObject @ <|
 	"Creator" -> "Jason Biggs, Wolfram Research", 
 	"License" -> "MIT", 
 	"PublisherID" -> "JasonB",
-	"Version" -> "0.1.0", 
-	"WolframVersion" -> "13.0+",
+	"Version" -> "1.1.0",
+	"WolframVersion" -> "13.3+",
 	"Extensions" ->
 		{
 			{
